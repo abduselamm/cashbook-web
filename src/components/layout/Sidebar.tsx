@@ -69,9 +69,9 @@ export function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                 <div className="flex h-16 items-center px-6 border-b border-[#EEEEEE]">
                     <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary overflow-hidden whitespace-nowrap">
                         <span className={cn("transition-opacity duration-300 text-[#4863D4]", !isOpen && "hidden")}>
-                            CashBook
+                            HISAB
                         </span>
-                        {!isOpen && <span className="text-[#4863D4]">CB</span>}
+                        {!isOpen && <span className="text-[#4863D4]">H</span>}
                     </Link>
                 </div>
 

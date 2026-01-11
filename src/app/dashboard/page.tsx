@@ -45,7 +45,7 @@ export default function DashboardPage() {
                 <div className="relative w-full sm:w-72">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <Input
-                        placeholder="Search cashbooks..."
+                        placeholder="Search HISAB..."
                         className="pl-9 bg-white border-gray-200 input-clean h-10"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -53,14 +53,14 @@ export default function DashboardPage() {
                 </div>
                 <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto font-semibold shadow-none">
                     <Plus className="mr-2 h-4 w-4" />
-                    New Cashbook
+                    HISAB
                 </Button>
             </div>
 
             {/* List View similar to real app */}
             <div className="rounded-[4px] border border-[#EEEEEE] bg-white overflow-hidden shadow-clean">
                 <div className="grid grid-cols-12 gap-4 border-b border-[#EEEEEE] bg-[#F9FAFB] px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <div className="col-span-6 md:col-span-5">Book Name</div>
+                    <div className="col-span-6 md:col-span-5">HISAB Name</div>
                     <div className="hidden md:col-span-3 md:block">Last Updated</div>
                     <div className="col-span-4 md:col-span-3 text-right">Balance</div>
                     <div className="hidden md:col-span-1 md:block"></div>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
                         ))
                     ) : (
                         <div className="p-12 text-center text-gray-500 text-sm">
-                            No cashbooks found. Create one to get started.
+                            No HISAB found. Create one to get started.
                         </div>
                     )}
                 </div>

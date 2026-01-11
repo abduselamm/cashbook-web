@@ -31,10 +31,10 @@ export function AddCashbookModal({ isOpen, onClose }: AddCashbookModalProps) {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Create New Cashbook">
+        <Modal isOpen={isOpen} onClose={onClose} title="Create New HISAB">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium text-gray-700">Cashbook Name</label>
+                    <label htmlFor="name" className="text-sm font-medium text-gray-700">HISAB Name</label>
                     <Input
                         id="name"
                         placeholder="e.g. Office Expenses, Project A, Daily Sales"
@@ -53,7 +53,7 @@ export function AddCashbookModal({ isOpen, onClose }: AddCashbookModalProps) {
                         Cancel
                     </Button>
                     <Button type="submit" disabled={!name.trim() || loading} isLoading={loading}>
-                        Create Book
+                        Create HISAB
                     </Button>
                 </div>
             </form>
