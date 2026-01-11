@@ -10,7 +10,8 @@ import { AddTransactionModal } from '@/components/transactions/AddTransactionMod
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf';
+
 import autoTable from 'jspdf-autotable';
 
 export default function CashbookPage() {

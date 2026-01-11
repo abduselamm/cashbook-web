@@ -54,14 +54,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                     if (json.data) {
                         setUser(json.data.user);
                         setBusiness(json.data.business);
+                        setBusinesses(json.data.businesses || [json.data.business]);
                         setCashbooks(json.data.cashbooks);
                     } else {
                         // Initialize new user with sample data
                         const newUser = { ...sampleUser, name: session.user?.name || 'User', email: session.user?.email || 'user@example.com', avatar: session.user?.image || undefined };
                         setUser(newUser);
                         setBusiness(sampleBusiness);
+                        setBusinesses([sampleBusiness]);
                         setCashbooks(sampleCashbooks);
                     }
+
                 } catch (error) {
                     console.error("Failed to load from Drive", error);
                 }
@@ -95,7 +98,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const saveData = async () => {
             setSyncStatus('syncing');
-            const dataToSave = { user, business, cashbooks };
+            const dataToSave = { user, business, businesses, cashbooks };
 
             if (status === 'authenticated') {
                 try {
@@ -122,7 +125,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const timeoutId = setTimeout(saveData, 1000);
         return () => clearTimeout(timeoutId);
-    }, [user, business, cashbooks, loading, status]);
+    }, [user, business, businesses, cashbooks, loading, status]);
+
 
     const login = () => {
         setUser(sampleUser);
