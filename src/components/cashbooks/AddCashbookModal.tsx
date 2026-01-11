@@ -44,7 +44,7 @@ export function AddCashbookModal({ isOpen, onClose }: AddCashbookModalProps) {
                         required
                     />
                     <p className="text-xs text-muted-foreground text-gray-500">
-                        Give your cashbook a recognizable name to easily identify it later.
+                        Give your HISAB a recognizable name to easily identify it later.
                     </p>
                 </div>
 

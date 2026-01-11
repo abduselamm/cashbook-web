@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 
-const CASHBOOK_DB_FILENAME = 'cashbook_db.json';
+const HISAB_DB_FILENAME = 'hisab_db.json';
 
 // Initialize Drive Client
 export const getDriveClient = (accessToken: string) => {
@@ -16,7 +16,7 @@ export const findDatabaseFile = async (accessToken: string) => {
 
     try {
         const response = await drive.files.list({
-            q: `name = '${CASHBOOK_DB_FILENAME}' and trashed = false`,
+            q: `name = '${HISAB_DB_FILENAME}' and trashed = false`,
             fields: 'files(id, name)',
             spaces: 'drive',
         });
@@ -38,7 +38,7 @@ export const createDatabaseFile = async (accessToken: string, initialData: any) 
 
     try {
         const fileMetadata = {
-            name: CASHBOOK_DB_FILENAME,
+            name: HISAB_DB_FILENAME,
             mimeType: 'application/json',
         };
 

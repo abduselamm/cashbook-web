@@ -7,7 +7,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CashBook - UPI wallet for Business Expenses",
+  title: "HISAB - Smart Expense Management for Business",
   description: "Manage your business expenses with ease.",
 };
 

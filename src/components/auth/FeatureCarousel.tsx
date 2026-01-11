@@ -18,7 +18,7 @@ const features = [
     },
     {
         id: 3,
-        title: "Multiple Cashbooks",
+        title: "Multiple HISABs",
         description: "Create separate books for different projects or branches.",
         image: "https://illustrations.popsy.co/blue/finance.svg"
     }

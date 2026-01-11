@@ -12,7 +12,7 @@ const navItems = [
         title: "Main",
         items: [
             {
-                title: "Cashbooks",
+                title: "HISABs",
                 href: "/dashboard",
                 icon: Book,
             },

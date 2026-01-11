@@ -39,7 +39,7 @@ export function LoginForm() {
     return (
         <div className="w-full max-w-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold text-gray-900">Sign in to CashBook</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Sign in to HISAB</h1>
                 <p className="text-sm text-gray-500">Welcome back! Please enter your details.</p>
             </div>
 

@@ -64,7 +64,7 @@ export default function CashbookPage() {
     };
 
     if (loading) return <div className="p-8 text-sm text-gray-500">Loading ledger...</div>;
-    if (!cashbook) return <div className="p-8 text-sm text-red-500">Cashbook not found</div>;
+    if (!cashbook) return <div className="p-8 text-sm text-red-500">HISAB not found</div>;
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-24">
@@ -73,7 +73,7 @@ export default function CashbookPage() {
             <div className="flex items-center justify-between border-b border-[#EEEEEE] pb-4 bg-white -mx-6 px-6 pt-2 sticky top-0 z-10 shadow-sm">
                 <div>
                     <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <Link href="/dashboard" className="hover:text-primary">Cashbooks</Link>
+                        <Link href="/dashboard" className="hover:text-primary">HISABs</Link>
                         <span>/</span>
                         <span className="text-gray-900">{cashbook.name}</span>
                     </div>
