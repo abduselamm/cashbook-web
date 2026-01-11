@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #4863D4;
+  --bg-page: #F5F6FA;
+}
+
+body {
+  background: var(--bg-page);
+  font-family: 'Inter', sans-serif;
+  color: #1F2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Utility to match the 'discrete' look - flatter inputs */
+.input-clean {
+  @apply border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md transition-all;
+}
