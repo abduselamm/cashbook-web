@@ -75,8 +75,11 @@ export function Header({ toggleSidebar, isMobile }: HeaderProps) {
                         </div>
                         <div className="hidden md:block text-left">
                             <p className="text-sm font-medium text-gray-900 leading-none">{user?.name}</p>
-                            <p className="text-xs text-gray-500 mt-1">{user?.role || 'User'}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {business?.members.find(m => m.id === user?.id)?.role || 'User'}
+                            </p>
                         </div>
+
                     </button>
 
                     {showProfile && (
