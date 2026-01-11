@@ -33,8 +33,26 @@ export const sampleBusiness: Business = {
 export const sampleCashbooks: Cashbook[] = [
     {
         id: "cb1",
+        businessId: "b1",
         name: "September Expenses",
         members: ["u1", "u2"],
+
+        bookMembers: [
+            { ...sampleUser, bookRole: 'ADMIN' },
+            {
+                id: "u2",
+                name: "John Doe",
+                email: "john@example.com",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+                bookRole: 'OPERATOR',
+                permissions: {
+                    canEditEntries: true,
+                    canAddBackdatedEntries: false,
+                    canViewNetBalance: true,
+                    canViewOtherEntries: true
+                }
+            }
+        ],
         lastUpdated: new Date().toISOString(),
         stats: {
             totalIn: 50000,
@@ -82,8 +100,13 @@ export const sampleCashbooks: Cashbook[] = [
     },
     {
         id: "cb2",
+        businessId: "b1",
         name: "Petty Cash",
         members: ["u1"],
+
+        bookMembers: [
+            { ...sampleUser, bookRole: 'ADMIN' }
+        ],
         lastUpdated: new Date(Date.now() - 86400000).toISOString(),
         stats: {
             totalIn: 5000,
@@ -93,3 +116,4 @@ export const sampleCashbooks: Cashbook[] = [
         transactions: []
     }
 ];
+

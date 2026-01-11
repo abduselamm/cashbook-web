@@ -5,16 +5,16 @@ import { useCashbook } from '@/context/CashbookContext';
 import TransactionTable from '@/components/transactions/TransactionTable';
 import { SummaryCards } from '@/components/transactions/SummaryCards';
 import { Button } from '@/components/ui/Button';
-import { Plus, Minus, FileDown, Search } from 'lucide-react'; // Minus for OUT
+import { Plus, Minus, FileDown, Search } from 'lucide-react';
 import { AddTransactionModal } from '@/components/transactions/AddTransactionModal';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
-import jsPDF from 'jspdf';
+import jsPDF from 'jsPDF';
 import autoTable from 'jspdf-autotable';
 
 export default function CashbookPage() {
-    const { cashbook, transactions, deleteTransaction, loading } = useCashbook();
+    const { cashbook, transactions, deleteTransaction, loading, userRole, userPermissions } = useCashbook();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [transactionType, setTransactionType] = useState<'IN' | 'OUT'>('IN');
 
@@ -57,18 +57,21 @@ export default function CashbookPage() {
             body: tableData,
             startY: 60,
             styles: { fontSize: 9 },
-            headStyles: { fillColor: [72, 99, 212] }, // Primary Blue
+            headStyles: { fillColor: [72, 99, 212] },
         });
 
         doc.save(`${cashbook.name}_Report.pdf`);
     };
+
+    const canAdd = userRole !== 'VIEWER' && userRole !== 'NOT_MEMBER';
+    const canDelete = userRole === 'ADMIN' || (userRole === 'OPERATOR' && userPermissions?.canEditEntries);
+    const canViewBalance = userRole === 'ADMIN' || (userRole === 'OPERATOR' && userPermissions?.canViewNetBalance) || userRole === 'VIEWER';
 
     if (loading) return <div className="p-8 text-sm text-gray-500">Loading ledger...</div>;
     if (!cashbook) return <div className="p-8 text-sm text-red-500">HISAB not found</div>;
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-24">
-
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#EEEEEE] pb-4 bg-white -mx-6 px-6 pt-2 sticky top-0 z-10 shadow-sm">
                 <div>
@@ -79,8 +82,8 @@ export default function CashbookPage() {
                     </div>
                     <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         {cashbook.name}
-                        <span className="text-xs font-medium px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full border border-gray-200">
-                            Private
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-[#EBEEFD] text-[#4863D4] rounded-full border border-blue-100 uppercase tracking-wider">
+                            {userRole}
                         </span>
                     </h1>
                 </div>
@@ -92,41 +95,50 @@ export default function CashbookPage() {
                 </div>
             </div>
 
-            <SummaryCards />
+            {canViewBalance ? <SummaryCards /> : (
+                <div className="bg-amber-50 border border-amber-100 p-6 rounded-xl text-amber-800 flex items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                        <Minus className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h4 className="font-bold">Access Restricted</h4>
+                        <p className="text-xs opacity-90">You don't have permission to view the net balance for this book.</p>
+                    </div>
+                </div>
+            )}
 
             <div className="flex items-center justify-between gap-4">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search by remark or amount..."
-                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-white"
+                        placeholder="Search HISAB..."
+                        className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#4863D4] focus:ring-4 focus:ring-blue-100/50 transition-all bg-white shadow-sm"
                     />
                 </div>
-                {/* Action Buttons - Top placement for desktop */}
-                <div className="flex gap-3">
-                    <Button
-                        onClick={() => handleOpenModal('IN')}
-                        variant="success" // Custom variant
-                        className="w-32 font-bold shadow-sm"
-                    >
-                        <Plus className="mr-1 h-5 w-5" />
-                        CASH IN
-                    </Button>
-                    <Button
-                        onClick={() => handleOpenModal('OUT')}
-                        variant="destructive"
-                        className="w-32 font-bold shadow-sm"
-                    >
-                        <Minus className="mr-1 h-5 w-5" />
-                        CASH OUT
-                    </Button>
-                </div>
+                {canAdd && (
+                    <div className="flex gap-3">
+                        <Button
+                            onClick={() => handleOpenModal('IN')}
+                            className="bg-[#01865F] hover:bg-[#017050] text-white px-6 h-11 font-bold shadow-md shadow-green-100"
+                        >
+                            <Plus className="mr-1 h-5 w-5" />
+                            CASH IN
+                        </Button>
+                        <Button
+                            onClick={() => handleOpenModal('OUT')}
+                            className="bg-[#C93B3B] hover:bg-[#B33535] text-white px-6 h-11 font-bold shadow-md shadow-red-100"
+                        >
+                            <Minus className="mr-1 h-5 w-5" />
+                            CASH OUT
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <TransactionTable
                 transactions={transactions}
-                onDelete={deleteTransaction}
+                onDelete={canDelete ? deleteTransaction : undefined}
             />
 
             <AddTransactionModal

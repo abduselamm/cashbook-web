@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Cashbook, Transaction } from '@/types';
+import { Cashbook, Transaction, BookRole, OperatorPermissions } from '@/types';
 import { useApp } from '@/context/AppContext';
 
 interface CashbookContextType {
@@ -9,8 +9,11 @@ interface CashbookContextType {
     transactions: Transaction[];
     addTransaction: (transaction: Omit<Transaction, 'id' | 'createdBy' | 'balance'>) => void;
     deleteTransaction: (id: string) => void;
+    userRole: BookRole | 'NOT_MEMBER';
+    userPermissions?: OperatorPermissions;
     loading: boolean;
 }
+
 
 const CashbookContext = createContext<CashbookContextType | undefined>(undefined);
 
@@ -91,18 +94,25 @@ export function CashbookProvider({
         });
     };
 
+    const memberInfo = cashbook?.bookMembers.find(m => m.id === user?.id);
+    const userRole = memberInfo?.bookRole || (user ? 'NOT_MEMBER' : 'VIEWER');
+    const userPermissions = memberInfo?.permissions;
+
     return (
         <CashbookContext.Provider value={{
             cashbook,
             transactions: cashbook?.transactions || [],
             addTransaction,
             deleteTransaction,
+            userRole,
+            userPermissions,
             loading: loading || appLoading
         }}>
             {children}
         </CashbookContext.Provider>
     );
 }
+
 
 export function useCashbook() {
     const context = useContext(CashbookContext);

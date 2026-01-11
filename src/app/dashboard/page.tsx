@@ -3,23 +3,30 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
-import { Plus, Search, ChevronRight } from 'lucide-react';
+import { Plus, Search, ChevronRight, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { AddCashbookModal } from '@/components/cashbooks/AddCashbookModal';
+import { BookMembersModal } from '@/components/cashbooks/BookMembersModal';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Cashbook } from '@/types';
+
 
 export default function DashboardPage() {
-    const { user, cashbooks, loading } = useApp();
+    const { user, cashbooks, business, loading } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedBook, setSelectedBook] = useState<Cashbook | null>(null);
 
-    const filteredCashbooks = cashbooks.filter(book =>
+    const businessCashbooks = cashbooks.filter(book => book.businessId === business?.id);
+
+    const filteredCashbooks = businessCashbooks.filter(book =>
         book.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const totalNetBalance = cashbooks.reduce((sum, book) => sum + (book.stats?.netBalance || 0), 0);
+    const totalNetBalance = businessCashbooks.reduce((sum, book) => sum + (book.stats?.netBalance || 0), 0);
+
 
     if (loading) {
         return <div className="p-8 text-sm text-gray-500">Loading...</div>;
@@ -27,7 +34,7 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
-            {/* Top Stats */}
+            {/* Top Stats - same as before */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-[4px] border border-[#EEEEEE] bg-white p-4 flex flex-col justify-center shadow-clean">
                     <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Total Net Balance</p>
@@ -37,7 +44,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="rounded-[4px] border border-[#EEEEEE] bg-white p-4 flex flex-col justify-center shadow-clean">
                     <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Total Books</p>
-                    <p className="text-2xl font-bold mt-1 text-gray-900">{cashbooks.length}</p>
+                    <p className="text-2xl font-bold mt-1 text-gray-900">{businessCashbooks.length}</p>
+
                 </div>
             </div>
 
@@ -51,45 +59,56 @@ export default function DashboardPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto font-semibold shadow-none">
+                <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto font-semibold shadow-none">
                     <Plus className="mr-2 h-4 w-4" />
                     HISAB
                 </Button>
             </div>
 
-            {/* List View similar to real app */}
+            {/* List View */}
             <div className="rounded-[4px] border border-[#EEEEEE] bg-white overflow-hidden shadow-clean">
                 <div className="grid grid-cols-12 gap-4 border-b border-[#EEEEEE] bg-[#F9FAFB] px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <div className="col-span-6 md:col-span-5">HISAB Name</div>
+                    <div className="col-span-5 md:col-span-4">HISAB Name</div>
                     <div className="hidden md:col-span-3 md:block">Last Updated</div>
                     <div className="col-span-4 md:col-span-3 text-right">Balance</div>
-                    <div className="hidden md:col-span-1 md:block"></div>
+                    <div className="col-span-3 md:col-span-2 text-right">Settings</div>
                 </div>
 
                 <div className="divide-y divide-[#EEEEEE]">
                     {filteredCashbooks.length > 0 ? (
                         filteredCashbooks.map((book) => (
-                            <Link
+                            <div
                                 key={book.id}
-                                href={`/dashboard/cashbooks/${book.id}`}
                                 className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-[#F9FAFB] transition-colors group"
                             >
-                                <div className="col-span-6 md:col-span-5 font-medium text-gray-900 flex items-center gap-3">
-                                    <div className="h-9 w-9 rounded-full bg-[#EBEEFD] text-[#4863D4] flex items-center justify-center text-xs font-bold border border-blue-100 uppercase">
+                                <Link
+                                    href={`/dashboard/cashbooks/${book.id}`}
+                                    className="col-span-5 md:col-span-4 font-medium text-gray-900 flex items-center gap-3 overflow-hidden"
+                                >
+                                    <div className="h-9 w-9 rounded-full bg-[#EBEEFD] text-[#4863D4] flex items-center justify-center text-xs font-bold border border-blue-100 uppercase shrink-0">
                                         {book.name.substring(0, 2)}
                                     </div>
-                                    <span className="text-sm font-semibold">{book.name}</span>
-                                </div>
+                                    <span className="text-sm font-semibold truncate">{book.name}</span>
+                                </Link>
                                 <div className="hidden md:col-span-3 md:block text-xs text-gray-500 font-medium">
                                     {book.lastUpdated ? format(new Date(book.lastUpdated), 'MMM d, h:mm a') : '-'}
                                 </div>
                                 <div className={`col-span-4 md:col-span-3 text-right font-bold text-sm ${book.stats.netBalance >= 0 ? 'text-[#01865F]' : 'text-[#C93B3B]'}`}>
                                     {formatCurrency(book.stats.netBalance)}
                                 </div>
-                                <div className="hidden md:col-span-1 md:flex justify-end text-gray-400 group-hover:text-[#4863D4]">
-                                    <ChevronRight className="h-5 w-5" />
+                                <div className="col-span-3 md:col-span-2 flex justify-end items-center gap-2">
+                                    <button
+                                        onClick={() => setSelectedBook(book)}
+                                        className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-400 hover:text-[#4863D4] transition-all border border-transparent hover:border-blue-50"
+                                        title="Manage Members"
+                                    >
+                                        <Users className="h-4 w-4" />
+                                    </button>
+                                    <Link href={`/dashboard/cashbooks/${book.id}`} className="text-gray-400 group-hover:text-[#4863D4]">
+                                        <ChevronRight className="h-5 w-5" />
+                                    </Link>
                                 </div>
-                            </Link>
+                            </div>
                         ))
                     ) : (
                         <div className="p-12 text-center text-gray-500 text-sm">
@@ -100,9 +119,17 @@ export default function DashboardPage() {
             </div>
 
             <AddCashbookModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
             />
+
+            {selectedBook && (
+                <BookMembersModal
+                    isOpen={!!selectedBook}
+                    onClose={() => setSelectedBook(null)}
+                    cashbook={selectedBook}
+                />
+            )}
         </div>
     );
 }

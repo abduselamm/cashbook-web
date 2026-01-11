@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Book, Users, Settings, HelpCircle, FileText, ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { BusinessSwitcher } from './BusinessSwitcher';
 
 const navItems = [
     {
@@ -40,6 +41,8 @@ const navItems = [
     },
 ];
 
+import { useApp } from '@/context/AppContext';
+
 interface SidebarProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
@@ -48,6 +51,8 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
     const pathname = usePathname();
+    const { business, user } = useApp();
+
 
     return (
         <>
@@ -75,44 +80,57 @@ export function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                     </Link>
                 </div>
 
+                <BusinessSwitcher isOpen={isOpen} />
+
                 <div className="flex-1 overflow-y-auto py-6">
                     <nav className="grid gap-8 px-4">
-                        {navItems.map((section, index) => (
-                            <div key={index}>
-                                {isOpen && section.title !== 'Main' && (
-                                    <h3 className="mb-3 px-3 text-xs font-semibold uppercase text-gray-400 tracking-wider">
-                                        {section.title}
-                                    </h3>
-                                )}
-                                <div className="grid gap-1">
-                                    {section.items.map((item, itemIndex) => {
-                                        const Icon = item.icon;
-                                        // Active if it starts with the href (simple check)
-                                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                        {(() => {
+                            const currentMember = business?.members.find((m: any) => m.id === user?.id);
+                            const role = currentMember?.role || 'STAFF';
 
-                                        return (
-                                            <Link
-                                                key={itemIndex}
-                                                href={item.href}
-                                                className={cn(
-                                                    "flex items-center gap-3 rounded-[4px] px-3 py-2.5 text-sm font-medium transition-colors",
-                                                    isActive
-                                                        ? "bg-[#4863D4] text-white shadow-sm"
-                                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                                                    !isOpen && "justify-center px-2"
-                                                )}
-                                                title={!isOpen ? item.title : undefined}
-                                            >
-                                                <Icon className={cn("h-5 w-5", !isOpen && "h-6 w-6")} strokeWidth={isActive ? 2 : 1.5} />
-                                                {isOpen && <span>{item.title}</span>}
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
+                            return navItems.map((section, index) => {
+                                // Hide Settings section for Staff
+                                if (section.title === 'Settings' && role === 'STAFF') return null;
+
+                                return (
+                                    <div key={index}>
+                                        {isOpen && section.title !== 'Main' && (
+                                            <h3 className="mb-3 px-3 text-xs font-semibold uppercase text-gray-400 tracking-wider">
+                                                {section.title}
+                                            </h3>
+                                        )}
+                                        <div className="grid gap-1">
+                                            {section.items.map((item, itemIndex) => {
+                                                const Icon = item.icon;
+                                                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
+                                                return (
+                                                    <Link
+                                                        key={itemIndex}
+                                                        href={item.href}
+                                                        className={cn(
+                                                            "flex items-center gap-3 rounded-[4px] px-3 py-2.5 text-sm font-medium transition-colors",
+                                                            isActive
+                                                                ? "bg-[#4863D4] text-white shadow-sm"
+                                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                                                            !isOpen && "justify-center px-2"
+                                                        )}
+                                                        title={!isOpen ? item.title : undefined}
+                                                    >
+                                                        <Icon className={cn("h-5 w-5", !isOpen && "h-6 w-6")} strokeWidth={isActive ? 2 : 1.5} />
+                                                        {isOpen && <span>{item.title}</span>}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            });
+                        })()}
                     </nav>
                 </div>
+
+
 
                 <div className="p-4 border-t border-[#EEEEEE]">
                     <Button

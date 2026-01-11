@@ -15,18 +15,27 @@ export async function GET(req: NextRequest) {
         let fileId = await findDatabaseFile(session.accessToken);
 
         if (!fileId) {
-            // If no file exists, return null (client will trigger a create with initial data if needed, or we can create empty here)
-            // Better: Return empty object or specific status so client knows to initialize
             return NextResponse.json({ data: null, status: 'not_found' });
         }
 
         const data = await readDatabaseFile(session.accessToken, fileId);
         return NextResponse.json({ data });
-    } catch (error) {
-        console.error("Sync GET Error:", error);
-        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Sync GET Error Details:", {
+            message: error.message,
+            code: error.code,
+            status: error.status,
+            data: error.response?.data
+        });
+
+        if (error.code === 401 || error.status === 401) {
+            return NextResponse.json({ error: "Authentication expired. Please sign in again." }, { status: 401 });
+        }
+
+        return NextResponse.json({ error: "Failed to fetch data from Drive" }, { status: 500 });
     }
 }
+
 
 // POST: Save data to Drive (Create or Update)
 export async function POST(req: NextRequest) {
@@ -49,8 +58,19 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ success: true, fileId });
-    } catch (error) {
-        console.error("Sync POST Error:", error);
-        return NextResponse.json({ error: "Failed to save data" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Sync POST Error Details:", {
+            message: error.message,
+            code: error.code,
+            status: error.status,
+            data: error.response?.data
+        });
+
+        if (error.code === 401 || error.status === 401) {
+            return NextResponse.json({ error: "Authentication expired. Please sign in again." }, { status: 401 });
+        }
+
+        return NextResponse.json({ error: "Failed to save data to Drive" }, { status: 500 });
     }
 }
+

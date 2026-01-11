@@ -8,7 +8,7 @@ import { Trash2, FileText, Calendar, Clock } from 'lucide-react';
 
 interface TransactionTableProps {
     transactions: Transaction[];
-    onDelete: (id: string) => void;
+    onDelete?: (id: string) => void;
 }
 
 export default function TransactionTable({ transactions, onDelete }: TransactionTableProps) {
@@ -41,7 +41,7 @@ export default function TransactionTable({ transactions, onDelete }: Transaction
                         {transactions.map((transaction) => (
                             <tr
                                 key={transaction.id}
-                                className="group transition-colors bg-[#EBEEFD] hover:bg-[#DBEAFE] h-[72px]" // Matches extracted colors and height
+                                className="group transition-colors hover:bg-gray-50 h-[72px]"
                             >
                                 <td className="px-6 py-3">
                                     <div className="flex flex-col">
@@ -56,7 +56,7 @@ export default function TransactionTable({ transactions, onDelete }: Transaction
                                                 {formatTime(transaction.time)}
                                             </span>
                                             {transaction.category && (
-                                                <span className="bg-white px-2 py-0.5 rounded border border-blue-100 text-[#4863D4] font-medium">
+                                                <span className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-[#4863D4] font-medium">
                                                     {transaction.category}
                                                 </span>
                                             )}
@@ -85,14 +85,16 @@ export default function TransactionTable({ transactions, onDelete }: Transaction
                                     {transaction.balance !== undefined ? formatCurrency(transaction.balance) : '-'}
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => onDelete(transaction.id)}
-                                        className="h-8 w-8 text-gray-400 hover:text-[#C93B3B] opacity-0 group-hover:opacity-100 transition-all"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    {onDelete && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onDelete(transaction.id)}
+                                            className="h-8 w-8 text-gray-400 hover:text-[#C93B3B] opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
