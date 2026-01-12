@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { User as User Icon, Mail, Phone, Camera, Save } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, Camera, Save } from 'lucide-react';
 
 export default function ProfilePage() {
     const { user, setUser } = useApp() as any;
