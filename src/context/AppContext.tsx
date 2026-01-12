@@ -15,8 +15,10 @@ interface AppContextType {
     syncStatus: 'idle' | 'syncing' | 'saved' | 'error';
     login: () => void;
     logout: () => void;
+    setUser: (user: User) => void;
     switchBusiness: (id: string) => void;
     addBusiness: (name: string) => void;
+    updateBusiness: (updates: Partial<Business>) => void;
     addCashbook: (name: string) => void;
     updateCashbook: (id: string, updates: Partial<Cashbook>) => void;
     deleteCashbook: (id: string) => void;
@@ -46,7 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setLoading(true);
 
             if (status === 'authenticated' && session?.accessToken) {
-                // Load from Drive
+                // Load from Drive - NO localStorage fallback for authenticated users
                 try {
                     const res = await fetch('/api/sync');
                     const json = await res.json();
@@ -67,9 +69,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
                 } catch (error) {
                     console.error("Failed to load from Drive", error);
+                    setSyncStatus('error');
+                    // Show user-friendly error - don't fall back to localStorage for authenticated users
+                    alert("Failed to load data from Google Drive. Please check your connection and try again.");
                 }
             } else if (status === 'unauthenticated') {
-                // Fallback to LocalStorage for guest/dev mode if not using NextAuth
+                // Only use localStorage for unauthenticated/guest mode
                 const loadedUser = getStorage<User | null>('user', null);
                 const loadedBusiness = getStorage<Business | null>('business', null);
                 const loadedBusinesses = getStorage<Business[]>('businesses', []);
@@ -100,20 +105,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setSyncStatus('syncing');
             const dataToSave = { user, business, businesses, cashbooks };
 
-            if (status === 'authenticated') {
+            if (status === 'authenticated' && session?.accessToken) {
                 try {
-                    await fetch('/api/sync', {
+                    const response = await fetch('/api/sync', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ data: dataToSave })
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`Sync failed: ${response.statusText}`);
+                    }
+
                     setSyncStatus('saved');
                     setTimeout(() => setSyncStatus('idle'), 2000);
                 } catch (error) {
                     console.error("Failed to save to Drive", error);
                     setSyncStatus('error');
+                    // Don't clear error status automatically - let user know sync failed
                 }
             } else {
+                // Only save to localStorage for unauthenticated users
                 setStorage('user', user);
                 setStorage('business', business);
                 setStorage('businesses', businesses);
@@ -125,7 +137,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const timeoutId = setTimeout(saveData, 1000);
         return () => clearTimeout(timeoutId);
-    }, [user, business, businesses, cashbooks, loading, status]);
+    }, [user, business, businesses, cashbooks, loading, status, session]);
 
 
     const login = () => {
@@ -277,28 +289,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         setBusinesses(prev => {
             const bizIndex = prev.findIndex(b => b.id === businessId);
-            if (bizIndex === -1) return prev;
+
+            // If business doesn't exist in the list, we can't join it
+            if (bizIndex === -1) {
+                console.error('Business not found');
+                return prev;
+            }
 
             const biz = prev[bizIndex];
-            if (biz.members.some(m => m.id === user.id)) return prev;
 
-            const updatedBiz = {
-                ...biz,
-                members: [...biz.members, { ...user, role, status: 'ACTIVE' as const, joinedAt: new Date().toISOString() }]
-            };
+            // Check if user is already a member (update status if INVITED)
+            const existingMemberIndex = biz.members.findIndex(m => m.email === user.email || m.id === user.id);
+
+            let updatedBiz;
+            if (existingMemberIndex > -1) {
+                // User exists - update status to ACTIVE and ensure role is set
+                const updatedMembers = [...biz.members];
+                updatedMembers[existingMemberIndex] = {
+                    ...updatedMembers[existingMemberIndex],
+                    id: user.id,
+                    status: 'ACTIVE' as const,
+                    role,
+                    joinedAt: updatedMembers[existingMemberIndex].status === 'INVITED' ? new Date().toISOString() : updatedMembers[existingMemberIndex].joinedAt
+                };
+                updatedBiz = { ...biz, members: updatedMembers };
+            } else {
+                // User doesn't exist - add as new member
+                updatedBiz = {
+                    ...biz,
+                    members: [...biz.members, { ...user, role, status: 'ACTIVE' as const, joinedAt: new Date().toISOString() }]
+                };
+            }
+
             const updatedBusinesses = [...prev];
             updatedBusinesses[bizIndex] = updatedBiz;
 
-            // If it's the current business, update that too
-            if (business?.id === businessId) {
-                setBusiness(updatedBiz);
-            }
+            // Set this as the current business
+            setBusiness(updatedBiz);
 
             return updatedBusinesses;
         });
     };
 
 
+
+    const updateBusiness = (updates: Partial<Business>) => {
+        if (!business) return;
+        const updatedBusiness = { ...business, ...updates };
+        setBusiness(updatedBusiness);
+        setBusinesses(prev => prev.map(b => b.id === business.id ? updatedBusiness : b));
+    };
 
     return (
         <AppContext.Provider value={{
@@ -310,8 +350,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             syncStatus,
             login,
             logout,
+            setUser,
             switchBusiness,
             addBusiness,
+            updateBusiness,
             addCashbook,
             updateCashbook,
             deleteCashbook,

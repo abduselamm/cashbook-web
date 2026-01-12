@@ -15,7 +15,7 @@ interface AddMemberModalProps {
 }
 
 export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
-    const { inviteMember } = useApp();
+    const { inviteMember, business } = useApp();
     const [email, setEmail] = useState('');
     const [role, setRole] = useState<Role>('STAFF');
 
@@ -51,6 +51,21 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Add Team Member">
             <form onSubmit={handleInvite} className="space-y-6">
+                {/* Business Context Display */}
+                {business && (
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-white flex items-center justify-center text-[#4863D4] shadow-sm">
+                            <Users className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-gray-900">Inviting to Business</h4>
+                            <p className="text-xs text-gray-600 mt-0.5">
+                                Member will be added to <span className="font-bold">{business.name}</span>
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email Address</label>
                     <Input

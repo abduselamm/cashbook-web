@@ -44,12 +44,13 @@ export default function InvitePage() {
             // Call the joinBusiness function from AppContext
             joinBusiness(inviteData.businessId, inviteData.role);
 
-            // Wait a bit for effect
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Wait for state update
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
             alert(`Successfully joined ${inviteData.businessName}!`);
             router.push('/dashboard');
         } catch (e) {
+            console.error('Failed to accept invitation:', e);
             alert("Failed to join business. Please try again.");
         } finally {
             setAccepting(false);

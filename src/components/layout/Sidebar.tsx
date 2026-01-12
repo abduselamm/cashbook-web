@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Book, Users, Settings, HelpCircle, FileText, ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { Book, Users, Settings, HelpCircle, FileText, ChevronLeft, ChevronRight, LayoutDashboard, User } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { BusinessSwitcher } from './BusinessSwitcher';
 
@@ -27,6 +27,11 @@ const navItems = [
     {
         title: "Settings",
         items: [
+            {
+                title: "Profile",
+                href: "/dashboard/profile",
+                icon: User,
+            },
             {
                 title: "Team Settings",
                 href: "/dashboard/team",
@@ -89,8 +94,15 @@ export function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                             const role = currentMember?.role || 'STAFF';
 
                             return navItems.map((section, index) => {
-                                // Hide Settings section for Staff
-                                if (section.title === 'Settings' && role === 'STAFF') return null;
+                                // Filter items based on role
+                                let filteredItems = section.items;
+                                if (section.title === 'Settings' && role === 'STAFF') {
+                                    // Staff can only see Profile, not Team or Business Settings
+                                    filteredItems = section.items.filter(item => item.href === '/dashboard/profile');
+                                }
+
+                                // Don't show section if no items left after filtering
+                                if (filteredItems.length === 0) return null;
 
                                 return (
                                     <div key={index}>
@@ -100,7 +112,7 @@ export function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                                             </h3>
                                         )}
                                         <div className="grid gap-1">
-                                            {section.items.map((item, itemIndex) => {
+                                            {filteredItems.map((item, itemIndex) => {
                                                 const Icon = item.icon;
                                                 const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
 
